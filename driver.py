@@ -1,3 +1,5 @@
+import sys
+import io
 import praw
 import keys
 from praw.models import MoreComments
@@ -6,6 +8,9 @@ reddit = praw.Reddit(client_id=keys.client_id,
                      client_secret=keys.client_secret,
                      user_agent='my user agent')
 
+# use unicode encoding
+sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding = 'utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding = 'utf-8')
 
 def main():
     print(reddit.read_only)
@@ -19,18 +24,22 @@ def main():
             for top_level_comment in submission.comments:
                 if isinstance(top_level_comment, MoreComments):
                     continue
-                com_string = top_level_comment.body #.encode('cp1252').decode('cp1252').encode('UTF-8')
-                # break
-                file.write(com_string)
+                com_string = top_level_comment.body
                 try:
                     print(com_string)
                     file.write(com_string)
                 except:
                     err_count += 1
+                    # catch_encoding_error(file, com_string)
                 count += 1
             print(err_count)
             print(count)
             file.close()
         test += 1
+
+def catch_encoding_error(f, comment):
+    for c in comment:
+        print(c)
+        f.write(c)
 
 main()
