@@ -1,0 +1,5 @@
+# ignore credentials
+keys.py
+
+# ignore compiled
+__pycache__/
