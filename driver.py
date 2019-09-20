@@ -2,6 +2,9 @@ import sys
 import io
 import praw
 import keys
+import pandas as pd
+from datetime import datetime
+startTime = datetime.now()
 from praw.models import MoreComments
 
 reddit = praw.Reddit(client_id=keys.client_id,
@@ -12,10 +15,38 @@ reddit = praw.Reddit(client_id=keys.client_id,
 sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding = 'utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding = 'utf-8')
 
+def test():
+    test = 1
+    cols = ['body', 'flair']
+    df = pd.DataFrame([], columns = cols)
+    for submission in reddit.subreddit('nfl').hot(limit=3):
+        count = 0
+        if test == 3:
+            for top_level_comment in submission.comments:
+                if isinstance(top_level_comment, MoreComments):
+                    continue
+                com = top_level_comment
+                com_string = top_level_comment.body
+                # attributes = top_level_comment.__dict__
+                # for item in attributes:
+                #     print(item)
+                #     print(attributes[item])
+                # print(top_level_comment.author_flair_css_class)
+                # break
+                tempdf = pd.DataFrame([[com.body, com.author_flair_css_class]], columns=cols)
+                df = df.append(tempdf, ignore_index = True)
+                count += 1
+
+            print(count)
+            print(df)
+            print(datetime.now() - startTime)
+            # file.close()
+        test += 1
+
 def main():
     print(reddit.read_only)
     # open file to write to
-    file = open("test.txt", "w", encoding = 'utf-8')
+    # file = open("test.txt", "w", encoding = 'utf-8')
     test = 1
     for submission in reddit.subreddit('nfl').hot(limit=3):
         count = 0
@@ -27,14 +58,15 @@ def main():
                 com_string = top_level_comment.body
                 try:
                     print(com_string)
-                    file.write(com_string)
+
+                    # file.write(com_string)
                 except:
                     err_count += 1
                     # catch_encoding_error(file, com_string)
                 count += 1
             print(err_count)
             print(count)
-            file.close()
+            # file.close()
         test += 1
 
 def catch_encoding_error(f, comment):
@@ -42,4 +74,6 @@ def catch_encoding_error(f, comment):
         print(c)
         f.write(c)
 
-main()
+# main()
+
+test()
