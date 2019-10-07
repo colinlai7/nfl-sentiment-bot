@@ -17,7 +17,6 @@ sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding = 'utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding = 'utf-8')
 
 def test():
-    test = 1
     cols = ['body', 'flair', 'score', 'comment_time', 'post_time', 'post_title']
     df = pd.DataFrame([], columns = cols)
 
@@ -25,9 +24,11 @@ def test():
     for submission in reddit.redditor('nfl_gamethread').submissions.new(limit=200):
         # filter by game thread posts
         if submission.title.startswith("Game Thread") and ("RedZone" not in submission.title):
-            # filter by date
             print(submission.title)
             post_date_time = datetime.utcfromtimestamp(submission.created_utc)#.strftime('%Y-%m-%d %H:%M:%S')
+            # filter by date to only include starting 2019 season
+            if post_date_time.day < 5 and post_date_time.month < 9 and post_date_time.year < 2019:
+                continue
             # iterate through a game thread's comments
             for top_level_comment in submission.comments:
                 if isinstance(top_level_comment, MoreComments):
@@ -46,9 +47,9 @@ def test():
                                 com.score, com_date_time, post_date_time,
                                 submission.title]], columns=cols)
                 df = df.append(tempdf, ignore_index = True)
-                # print(com_string)
+            # break after one
             break
-    print(df.head())
+    df.to_csv('testcsv')
     print(df['post_time'].unique())
     print(len(df))
     #
